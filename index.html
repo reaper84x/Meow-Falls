@@ -32,11 +32,22 @@
             left: 50%;
             transform: translate(-50%, -50%);
             background: #ffeed3;
-            padding: 20px;
+            padding: 30px;
             box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.3);
             border-radius: 10px;
             display: none;
             text-align: center;
+            font-size: 18px;
+            width: 280px;
+        }
+        #greeting button {
+            background-color: #5cb85c;
+            color: white;
+            font-size: 16px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
         }
         #gameOver {
             display: none;
@@ -58,7 +69,10 @@
 <body>
     <canvas id="gameCanvas" width="400" height="600"></canvas>
     <div id="score">Score: 0</div>
-    <div id="greeting">Welcome to <b>Meow Falls</b>! Catch as many kittens as you can and avoid letting them fall. Credit: Salman Groovin</div>
+    <div id="greeting">
+        <p>Welcome to <b>Meow Falls</b>! Catch as many kittens as you can and avoid letting them fall.<br>Credit: Salman Groovin</p>
+        <button onclick="startGame()">Start Game</button>
+    </div>
     <div id="gameOver">Game Over!</div>
     <div id="restart" onclick="startGame()">Restart</div>
 
@@ -67,10 +81,10 @@
         const ctx = canvas.getContext("2d");
 
         const kittenImg = new Image();
-        kittenImg.src = "https://i.postimg.cc/1tFcd8RR/20241112-222215.png";  // Updated kitten image URL
+        kittenImg.src = "https://i.postimg.cc/1tFcd8RR/20241112-222215.png";  // Corrected kitten image URL
 
         const basketImg = new Image();
-        basketImg.src = "https://i.postimg.cc/PrSZ2Wbz/20241112-221823.png";  // Updated basket image URL
+        basketImg.src = "https://i.postimg.cc/PrSZ2Wbz/20241112-221823.png";  // Corrected basket image URL
 
         let score = 0;
         let gameInterval;
@@ -169,8 +183,6 @@
         window.onload = () => {
             document.getElementById("greeting").style.display = "block";
         };
-
-        startGame();
     </script>
 </body>
 </html>

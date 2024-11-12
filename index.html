@@ -38,21 +38,12 @@
             display: none;
             text-align: center;
         }
-        #pause {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background-color: #f08a5d;
-            padding: 10px;
-            cursor: pointer;
-            border-radius: 5px;
-        }
         #gameOver {
             display: none;
             font-size: 24px;
             color: #d9534f;
         }
-        #resume, #restart {
+        #restart {
             display: none;
             font-size: 18px;
             color: #fff;
@@ -68,9 +59,7 @@
     <canvas id="gameCanvas" width="400" height="600"></canvas>
     <div id="score">Score: 0</div>
     <div id="greeting">Welcome to <b>Meow Falls</b>! Catch as many kittens as you can and avoid letting them fall. Credit: Salman Groovin</div>
-    <div id="pause">Pause</div>
     <div id="gameOver">Game Over!</div>
-    <div id="resume" onclick="resumeGame()">Resume</div>
     <div id="restart" onclick="startGame()">Restart</div>
 
     <script>
@@ -78,17 +67,16 @@
         const ctx = canvas.getContext("2d");
 
         const kittenImg = new Image();
-        kittenImg.src = "https://i.postimg.cc/1tFcd8RR/20241112-222215.png";
+        kittenImg.src = "https://i.postimg.cc/1tFcd8RR/20241112-222215.png";  // Updated kitten image URL
 
         const basketImg = new Image();
-        basketImg.src = "https://i.postimg.cc/PrSZ2Wbz/20241112-221823.png";
+        basketImg.src = "https://i.postimg.cc/PrSZ2Wbz/20241112-221823.png";  // Updated basket image URL
 
         let score = 0;
         let gameInterval;
         let kittens = [];
         let speed = 2;
         let isGameOver = false;
-        let isPaused = false;
 
         const basket = {
             x: canvas.width / 2 - 35,
@@ -160,18 +148,9 @@
             basket.x = Math.min(canvas.width - basket.width, Math.max(0, touchX - rect.left - basket.width / 2));
         }, { passive: false });
 
-        document.getElementById("pause").addEventListener("click", () => {
-            if (isPaused) {
-                resumeGame();
-            } else {
-                pauseGame();
-            }
-        });
-
         function startGame() {
             document.getElementById("greeting").style.display = "none";
             document.getElementById("gameOver").style.display = "none";
-            document.getElementById("resume").style.display = "none";
             document.getElementById("restart").style.display = "none";
             score = 0;
             speed = 2;
@@ -185,20 +164,6 @@
             clearInterval(gameInterval);
             document.getElementById("gameOver").style.display = "block";
             document.getElementById("restart").style.display = "block";
-        }
-
-        function pauseGame() {
-            isPaused = true;
-            clearInterval(gameInterval);
-            document.getElementById("resume").style.display = "block";
-            document.getElementById("pause").innerText = "Paused";
-        }
-
-        function resumeGame() {
-            isPaused = false;
-            gameInterval = setInterval(updateGame, 20);
-            document.getElementById("resume").style.display = "none";
-            document.getElementById("pause").innerText = "Pause";
         }
 
         window.onload = () => {

@@ -9,114 +9,86 @@
             margin: 0;
             overflow: hidden;
             font-family: 'Nunito', sans-serif;
+            background: linear-gradient(to bottom, #f5e6ca, #f3d1a3);
+            color: #3c3c3b;
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            background: linear-gradient(to bottom, #F4E1D2, #F1D3C4); /* Creamy color palette */
-            color: #333;
-            height: 100vh;
         }
         canvas {
-            border: 3px solid #fff;
-            background-color: #F1D3C4;
+            border: 2px solid #fff;
+            background-color: #ffe9c4;
         }
         #score {
             position: absolute;
             top: 20px;
-            font-size: 20px;
             left: 20px;
-            font-weight: bold;
+            font-size: 20px;
         }
-        #gameOver {
+        #greeting {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 30px;
-            color: red;
+            background: #ffeed3;
+            padding: 20px;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
             display: none;
+            text-align: center;
         }
-        #restart {
+        #pause {
             position: absolute;
-            top: 60%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 20px;
-            color: #fff;
-            background-color: #008CBA;
+            top: 20px;
+            right: 20px;
+            background-color: #f08a5d;
             padding: 10px;
             cursor: pointer;
-            display: none;
+            border-radius: 5px;
         }
-        #pauseMenu {
-            position: absolute;
-            top: 40%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
+        #gameOver {
             display: none;
+            font-size: 24px;
+            color: #d9534f;
         }
-        #greetingPopup {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: #FFF;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
+        #resume, #restart {
             display: none;
-        }
-        #startButton {
-            background-color: #ff6347;
-            border: none;
-            color: white;
-            padding: 10px 20px;
             font-size: 18px;
+            color: #fff;
+            background: #5cb85c;
+            padding: 10px;
             cursor: pointer;
             border-radius: 5px;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
     <canvas id="gameCanvas" width="400" height="600"></canvas>
     <div id="score">Score: 0</div>
+    <div id="greeting">Welcome to <b>Meow Falls</b>! Catch as many kittens as you can and avoid letting them fall. Credit: Salman Groovin</div>
+    <div id="pause">Pause</div>
     <div id="gameOver">Game Over!</div>
+    <div id="resume" onclick="resumeGame()">Resume</div>
     <div id="restart" onclick="startGame()">Restart</div>
-    <div id="pauseMenu">
-        <h2>Game Paused</h2>
-        <button onclick="resumeGame()">Resume</button><br><br>
-        <button onclick="startGame()">Restart</button>
-    </div>
-    <div id="greetingPopup">
-        <p>Welcome to <strong>Meow Falls!</strong></p>
-        <p>Catch the falling kittens, avoid the ones that fall!</p>
-        <p><em>Game Created by Salman Groovin</em></p>
-        <button id="startButton">Start Game</button>
-    </div>
 
     <script>
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
 
-        let score = 0;
-        let gameInterval;
-        let fallingKittens = [];
-        let speed = 2; // Initial speed
-        let isGameOver = false;
-        let isPaused = false;
+        const kittenImg = new Image();
+        kittenImg.src = "https://i.postimg.cc/1tFcd8RR/20241112-222215.png";
 
         const basketImg = new Image();
-        basketImg.src = "https://i.postimg.cc/JskVfNPf/basket.png";
+        basketImg.src = "https://i.postimg.cc/PrSZ2Wbz/20241112-221823.png";
 
-        const kittenImg = new Image();
-        kittenImg.src = "https://i.postimg.cc/sv1RcdSD/cat.png";
-
-        const goldenKittenImg = new Image();
-        goldenKittenImg.src = "https://i.postimg.cc/sv1RcdSD/cat.png"; // Golden kitten can be a different image if needed
+        let score = 0;
+        let gameInterval;
+        let kittens = [];
+        let speed = 2;
+        let isGameOver = false;
+        let isPaused = false;
 
         const basket = {
             x: canvas.width / 2 - 35,
@@ -126,17 +98,15 @@
         };
 
         class Kitten {
-            constructor(x, y, speed, isGolden = false) {
+            constructor(x, y, speed) {
                 this.x = x;
                 this.y = y;
                 this.speed = speed;
                 this.size = 50;
-                this.isGolden = isGolden;
             }
 
             draw() {
-                const img = this.isGolden ? goldenKittenImg : kittenImg;
-                ctx.drawImage(img, this.x, this.y, this.size, this.size);
+                ctx.drawImage(kittenImg, this.x, this.y, this.size, this.size);
             }
 
             update() {
@@ -146,8 +116,7 @@
 
         function spawnKitten() {
             const x = Math.random() * (canvas.width - 50);
-            const isGolden = Math.random() < 0.1; // 10% chance for a golden kitten
-            fallingKittens.push(new Kitten(x, 0, speed, isGolden));
+            kittens.push(new Kitten(x, 0, speed));
         }
 
         function detectCollision(kitten) {
@@ -163,20 +132,18 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.drawImage(basketImg, basket.x, basket.y, basket.width, basket.height);
 
-            fallingKittens.forEach((kitten, index) => {
+            kittens.forEach((kitten, index) => {
                 kitten.update();
                 kitten.draw();
 
                 if (kitten.y > canvas.height) {
-                    fallingKittens.splice(index, 1);
-                    // End game when a kitten is missed
+                    kittens.splice(index, 1);
                     endGame();
                 } else if (detectCollision(kitten)) {
-                    score += kitten.isGolden ? 5 : 1;
-                    fallingKittens.splice(index, 1);
+                    score++;
+                    kittens.splice(index, 1);
                     document.getElementById("score").innerText = `Score: ${score}`;
 
-                    // Increase speed every 10 points
                     if (score % 10 === 0) {
                         speed += 0.5;
                     }
@@ -186,16 +153,30 @@
             if (Math.random() < 0.02) spawnKitten();
         }
 
+        canvas.addEventListener("touchmove", (event) => {
+            event.preventDefault();
+            const touchX = event.touches[0].clientX;
+            const rect = canvas.getBoundingClientRect();
+            basket.x = Math.min(canvas.width - basket.width, Math.max(0, touchX - rect.left - basket.width / 2));
+        }, { passive: false });
+
+        document.getElementById("pause").addEventListener("click", () => {
+            if (isPaused) {
+                resumeGame();
+            } else {
+                pauseGame();
+            }
+        });
+
         function startGame() {
-            score = 0;
-            isGameOver = false;
-            isPaused = false;
-            document.getElementById("score").innerText = `Score: ${score}`;
+            document.getElementById("greeting").style.display = "none";
             document.getElementById("gameOver").style.display = "none";
+            document.getElementById("resume").style.display = "none";
             document.getElementById("restart").style.display = "none";
-            document.getElementById("pauseMenu").style.display = "none";
-            fallingKittens = [];
+            score = 0;
             speed = 2;
+            isGameOver = false;
+            kittens = [];
             gameInterval = setInterval(updateGame, 20);
         }
 
@@ -206,45 +187,25 @@
             document.getElementById("restart").style.display = "block";
         }
 
+        function pauseGame() {
+            isPaused = true;
+            clearInterval(gameInterval);
+            document.getElementById("resume").style.display = "block";
+            document.getElementById("pause").innerText = "Paused";
+        }
+
         function resumeGame() {
             isPaused = false;
             gameInterval = setInterval(updateGame, 20);
-            document.getElementById("pauseMenu").style.display = "none";
+            document.getElementById("resume").style.display = "none";
+            document.getElementById("pause").innerText = "Pause";
         }
 
-        document.getElementById("startButton").addEventListener("click", () => {
-            document.getElementById("greetingPopup").style.display = "none";
-            startGame();
-        });
-
-        function togglePauseMenu() {
-            isPaused = !isPaused;
-            if (isPaused) {
-                clearInterval(gameInterval);
-                document.getElementById("pauseMenu").style.display = "block";
-            } else {
-                resumeGame();
-            }
-        }
-
-        window.onload = function () {
-            document.getElementById("greetingPopup").style.display = "block";
+        window.onload = () => {
+            document.getElementById("greeting").style.display = "block";
         };
 
-        window.addEventListener("keydown", (event) => {
-            if (event.key === "p" || event.key === "P") {
-                togglePauseMenu();
-            }
-        });
-
-        canvas.addEventListener("touchmove", (event) => {
-            event.preventDefault();
-            const touchX = event.touches[0].clientX;
-            const rect = canvas.getBoundingClientRect();
-            const canvasX = touchX - rect.left;
-            basket.x = Math.min(canvas.width - basket.width, Math.max(0, canvasX - basket.width / 2));
-        }, { passive: false });
-
+        startGame();
     </script>
 </body>
 </html>
